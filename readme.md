@@ -18,9 +18,10 @@ measurements so you can track your progress.
 
 ## Technical stuff
 This app uses as little code as possible. No framework, just plain HTML, JavaScript and a little bit of CSS.
-For time measurement it uses the Web Audio API. This allows the browser to record audio from the microphone during a 
-sample time and then calculate the difference in time duration between the two. That difference is displayed as input 
-for the user to adjust the pendulum. 
+For time measurement it uses the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API). This 
+allows the browser to record audio from the microphone during a sample time and then calculate the difference in time 
+duration between the two. That difference is displayed as input for the user to adjust the pendulum. The Web Audio Api 
+is much more precise than if we, for instance, were to use the Date object.
 
 The app is designed to be straightforward and intuitive to use, with a focus on accuracy and precision rather than fancy 
 look and feel. However, it is designed to be used on mobile devices. By using the internal microphone you should need no 
