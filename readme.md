@@ -1,14 +1,29 @@
 # Tick Tack Timer
 This application aims to help clock repair technicians.
 When adjusting the pendulum of a mechanical clock, we need to check if the 'tick' takes the same time as the 'tack'.
-This application will help technicians to measure the time difference between the 'tick' and 'tack' sounds giving them 
+This application helps technicians to measure the time difference between the 'tick' and 'tack' sounds, giving them 
 input for adjustments.
- 
-# Technical
-This app uses as little code as possible. No framework, just plain html, javascript and a little bit of css
-For time measurement it uses the Web Audio API. 2 AudioBuffers are loaded and played in sequence.
-The difference between the two is measured and displayed.
-The app is designed to be simple and intuitive to use, with a focus on accuracy and precision rather than fancy look and 
-feel. However, it is designed to be used on mobile devices using the internal microphone. 10 seconds of audio is 
-recorded and played back. It is designed to be used on mobile devices using the internal microphone. That way you should 
-need no external hardware.
+
+# Calibration
+To catch the clocks sound and as little distractions as possible beyond that, the app needs to be calibrated. This is
+done by showing what the microphone hears when the clock ticks and tacks. Then you can adjust the frequency bandwidth
+that the app uses to recognize the tick and distinguish it from the tack sound. You can also adjust the threshold to
+filter out noise. Once you are satisfied that the app can distinguish the tick and tack sounds, you can start the app
+for your actual measurements.
+
+# Mesurements
+When you start a measurement session. The app will listen until it has heard the tick and tack sounds 10 times. Then it 
+will show the difference between the two in milliseconds and percentage. It also populates a table with the previous 
+measurements so you can track your progress.
+
+# Technical stuff
+This app uses as little code as possible. No framework, just plain HTML, JavaScript and a little bit of CSS.
+For time measurement it uses the Web Audio API. This allows the browser to record audio from the microphone during a 
+sample time and then calculate the difference in time duration between the two. That difference is displayed as input 
+for the user to adjust the pendulum. 
+
+The app is designed to be straightforward and intuitive to use, with a focus on accuracy and precision rather than fancy 
+look and feel. However, it is designed to be used on mobile devices. By using the internal microphone you should need no 
+external hardware beyond your telephone. 
+
+When you first start the app, it will most likely ask you if it is allowed to use the microphone.
