@@ -4,7 +4,7 @@ When adjusting the pendulum of a mechanical clock, we need to check if the 'tick
 This application helps technicians to measure the time difference between the 'tick' and 'tack' sounds, giving them 
 input for adjustments.
 
-## Calibration
+## Step 1: Calibration
 To catch the clocks sound and as little distractions as possible beyond that, the app needs to be calibrated. This is
 done by showing what the microphone hears when the clock ticks and tacks. Then you can adjust the frequency bandwidth
 that the app uses to recognize the tick and distinguish it from the tack sound. You can also adjust the threshold to
