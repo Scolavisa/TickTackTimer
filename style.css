@@ -490,4 +490,45 @@ main {
         gap: 8px;
         text-align: center;
     }
+    
+    .calibration-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .calibration-panel {
+        padding: 15px;
+    }
+    
+    .test-controls {
+        flex-direction: column;
+    }
+    
+    .test-controls .btn {
+        width: 100%;
+    }
+    
+    .threshold-control {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .threshold-control label {
+        text-align: left;
+    }
+    
+    .threshold-control input {
+        width: 100%;
+    }
+    
+    .detection-method {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .detection-method label {
+        text-align: left;
+    }
 }

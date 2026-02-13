@@ -11,7 +11,7 @@ that the app uses to recognize the tick and distinguish it from the tack sound. 
 filter out noise. Once you are satisfied that the app can distinguish the tick and tack sounds, you can start the app
 for your actual measurements.
 
-## Mesurements
+## Measurements
 When you start a measurement session. The app will listen until it has heard the tick and tack sounds 10 times. Then it 
 will show the difference between the two in milliseconds and percentage. It also populates a table with the previous 
 measurements so you can track your progress.
