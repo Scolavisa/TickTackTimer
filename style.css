@@ -1,0 +1,493 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+header p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+main {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn.primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn.secondary {
+    background: #f44336;
+    color: white;
+}
+
+.btn:not(.primary):not(.secondary) {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn.calibrate {
+    background: #9C27B0;
+    color: white;
+}
+
+.calibration-panel {
+    background: #f0f8ff;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.calibration-panel h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.calibration-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.calibration-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.setting-group label {
+    font-weight: bold;
+    color: #333;
+}
+
+.setting-group select,
+.setting-group input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.freq-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.freq-inputs input {
+    width: 80px;
+}
+
+.calibration-test {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.test-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.calibration-results {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.tick-counter,
+.time-remaining {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.tick-counter .count {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.time-remaining .time {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #666;
+}
+
+.calibration-advice {
+    padding: 10px;
+    background: #e8f5e8;
+    border-left: 4px solid #4CAF50;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #2e7d32;
+}
+
+.calibration-advice.warning {
+    background: #fff3e0;
+    border-left-color: #FFC107;
+    color: #f57c00;
+}
+
+.calibration-advice.error {
+    background: #ffebee;
+    border-left-color: #f44336;
+    color: #c62828;
+}
+
+.status {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.audio-level {
+    margin-bottom: 15px;
+}
+
+.level-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.level-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #FFC107, #f44336);
+    width: 0;
+    transition: width 0.1s ease;
+}
+
+.threshold-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.threshold-control input {
+    flex: 1;
+}
+
+.settings-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.detection-method select {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.progress-display {
+    text-align: center;
+    padding: 20px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.current-result {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #667eea;
+}
+
+.result-summary {
+    text-align: center;
+}
+
+.total-deviation {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.total-deviation .label {
+    display: block;
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.total-deviation .value {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.total-deviation .value.good {
+    color: #4CAF50;
+}
+
+.total-deviation .value.moderate {
+    color: #FFC107;
+}
+
+.total-deviation .value.poor {
+    color: #f44336;
+}
+
+.tick-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.tick-result {
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.tick-result .label {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.tick-result .value {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.tick-result .value.positive {
+    color: #f44336;
+}
+
+.tick-result .value.negative {
+    color: #4CAF50;
+}
+
+.measurements {
+    display: grid;
+    gap: 30px;
+}
+
+.current-measurement h3,
+.history h3 {
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+.tick-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.tick {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tick.active {
+    border-color: #667eea;
+    background: #e8f0fe;
+}
+
+.tick .label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #667eea;
+}
+
+.tick .time {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.tick .deviation {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.tick .deviation.positive {
+    color: #f44336;
+}
+
+.tick .deviation.negative {
+    color: #4CAF50;
+}
+
+.history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+    background: #fafafa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item .index {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.history-item .timestamp {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.history-item .total-dev {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.history-item .total-dev.good {
+    color: #4CAF50;
+}
+
+.history-item .total-dev.moderate {
+    color: #FFC107;
+}
+
+.history-item .total-dev.poor {
+    color: #f44336;
+}
+
+.history-item .breakdown {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 600px) {
+    .settings-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .tick-breakdown {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls {
+        flex-direction: column;
+    }
+    
+    .history-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: center;
+    }
+}

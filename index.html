@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klok Precisie Meter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Klok Precisie Meter</h1>
+            <p>Meet de timing precisie van klok tikken</p>
+        </header>
+
+        <main>
+            <div class="controls">
+                <button id="calibrateBtn" class="btn calibrate">Kalibreren</button>
+                <button id="startBtn" class="btn primary">Start Meting</button>
+                <button id="stopBtn" class="btn secondary" disabled>Stop Meting</button>
+                <button id="resetBtn" class="btn">Reset</button>
+            </div>
+
+            <div class="calibration-panel" id="calibrationPanel" style="display: none;">
+                <h3>Kalibratie Modus</h3>
+                <div class="calibration-content">
+                    <div class="calibration-settings">
+                        <div class="setting-group">
+                            <label for="frequencyPreset">Klok Type:</label>
+                            <select id="frequencyPreset">
+                                <option value="small">Kleine Klok (1-4kHz)</option>
+                                <option value="medium" selected>Gemiddelde Klok (0.8-3kHz)</option>
+                                <option value="large">Grote Klok (0.5-2kHz)</option>
+                                <option value="custom">Aangepast</option>
+                            </select>
+                        </div>
+                        <div class="setting-group" id="customFreqGroup" style="display: none;">
+                            <label>Aangepast Bereik:</label>
+                            <div class="freq-inputs">
+                                <input type="number" id="minFreq" placeholder="Min Hz" value="800">
+                                <span>-</span>
+                                <input type="number" id="maxFreq" placeholder="Max Hz" value="3000">
+                                <span>Hz</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calibration-test">
+                        <div class="test-controls">
+                            <button id="startCalibrationBtn" class="btn primary">Start Test (10s)</button>
+                            <button id="stopCalibrationBtn" class="btn secondary" disabled>Stop Test</button>
+                        </div>
+                        
+                        <div class="calibration-results" id="calibrationResults">
+                            <div class="tick-counter">
+                                <span class="label">Gedetecteerde Tikken:</span>
+                                <span id="tickCounter" class="count">0</span>
+                            </div>
+                            <div class="time-remaining">
+                                <span class="label">Resterende Tijd:</span>
+                                <span id="timeRemaining" class="time">10s</span>
+                            </div>
+                            <div class="calibration-advice" id="calibrationAdvice">
+                                Plaats de microfoon bij de klok en start de test
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status">
+                <div class="audio-level">
+                    <label>Audio Niveau:</label>
+                    <div class="level-bar">
+                        <div id="levelIndicator" class="level-fill"></div>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <div class="threshold-control">
+                        <label for="threshold">Detectie Drempel:</label>
+                        <input type="range" id="threshold" min="0" max="100" value="30">
+                        <span id="thresholdValue">30%</span>
+                    </div>
+                    <div class="detection-method">
+                        <label for="detectionMethod">Detectie Methode:</label>
+                        <select id="detectionMethod">
+                            <option value="amplitude">Amplitude (Geluidsniveau)</option>
+                            <option value="frequency">Frequentie Analyse</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="measurements">
+                <div class="current-measurement">
+                    <h3>Huidige Meting</h3>
+                    <div class="measurement-status">
+                        <div id="measurementProgress" class="progress-display">
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                            <div id="progressText" class="progress-text">Klaar om te starten</div>
+                        </div>
+                        <div id="currentResult" class="current-result" style="display: none;">
+                            <div class="result-summary">
+                                <div class="total-deviation">
+                                    <span class="label">Totale Afwijking:</span>
+                                    <span id="totalDeviation" class="value">-</span>
+                                </div>
+                                <div class="tick-breakdown">
+                                    <div class="tick-result">
+                                        <span class="label">Langere Intervals:</span>
+                                        <span id="avgTikDeviation" class="value">-</span>
+                                    </div>
+                                    <div class="tick-result">
+                                        <span class="label">Kortere Intervals:</span>
+                                        <span id="avgTakDeviation" class="value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history">
+                    <h3>Meetgeschiedenis</h3>
+                    <div id="measurementHistory" class="history-list">
+                        <!-- Metingen worden hier toegevoegd -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="audio-processor.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
