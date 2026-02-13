@@ -490,4 +490,21 @@ main {
         gap: 8px;
         text-align: center;
     }
+    
+    .calibration-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .calibration-panel {
+        padding: 15px;
+    }
+    
+    .test-controls {
+        flex-direction: column;
+    }
+    
+    .test-controls .btn {
+        width: 100%;
+    }
 }
