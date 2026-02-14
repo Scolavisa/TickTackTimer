@@ -202,7 +202,7 @@ class ClockPrecisionApp {
             
         } catch (error) {
             console.error('Failed to start calibration:', error);
-            alert('Kon geen toegang krijgen tot de microfoon. Controleer de permissies.');
+            alert('Kon geen toegang krijgen tot de microfoon. Fout: ' + error.message);
             this.resetCalibrationUI();
         }
     }
@@ -271,7 +271,7 @@ class ClockPrecisionApp {
             console.log('Batch measurement started');
         } catch (error) {
             console.error('Failed to start measurement:', error);
-            alert('Kon geen toegang krijgen tot de microfoon. Controleer de permissies.');
+            alert('Kon geen toegang krijgen tot de microfoon. Fout: ' + error.message);
             
             // Reset UI
             this.resetUIToStart();
