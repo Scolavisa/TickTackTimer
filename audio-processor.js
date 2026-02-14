@@ -41,9 +41,18 @@ class AudioProcessor {
         this.onBatchComplete = null;
         this.onProgress = null;
         this.onCalibrationUpdate = null;
+        this.isProcessing = false;
     }
 
     async initialize() {
+        if (this.audioContext) {
+            console.log('Audio processor already initialized, resuming context');
+            if (this.audioContext.state === 'suspended') {
+                await this.audioContext.resume();
+            }
+            return true;
+        }
+
         try {
             // Create audio context
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -92,32 +101,21 @@ class AudioProcessor {
             throw new Error('Audio processor not initialized');
         }
 
-        // Resume audio context if suspended (required by some browsers)
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-        }
-
         this.isListening = true;
         this.lastTickTime = null;
         this.isWaitingForTak = false;
         this.currentBatch = [];
         this.isLearningPhase = true;
         
-        // Test if we're getting any audio data
-        this.testAudioInput();
-        
-        this.processAudio();
+        if (!this.isProcessing) {
+            this.processAudio();
+        }
         console.log(`Started listening for ${this.targetBatchSize} tik-tak pairs`);
     }
 
     startCalibration(duration = 10) {
         if (!this.audioContext || !this.analyser) {
             throw new Error('Audio processor not initialized');
-        }
-
-        // Resume audio context if suspended
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
         }
 
         this.isCalibrating = true;
@@ -127,7 +125,9 @@ class AudioProcessor {
         this.calibrationDuration = duration;
         this.lastTickTime = null;
         
-        this.processAudio();
+        if (!this.isProcessing) {
+            this.processAudio();
+        }
         console.log(`Started calibration for ${duration} seconds`);
     }
 
@@ -175,8 +175,12 @@ class AudioProcessor {
     }
 
     processAudio() {
-        if (!this.isListening) return;
+        if (!this.isListening) {
+            this.isProcessing = false;
+            return;
+        }
 
+        this.isProcessing = true;
         // Get current audio data
         this.analyser.getByteTimeDomainData(this.dataArray);
         this.analyser.getByteFrequencyData(this.frequencyData);
