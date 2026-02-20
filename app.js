@@ -49,6 +49,9 @@ class ClockPrecisionApp {
         // History
         this.historyList = document.getElementById('measurementHistory');
         
+        // Measurements section
+        this.measurementsSection = document.getElementById('measurementsSection');
+        
         console.log('Elements initialized. CalibrateBtn:', this.calibrateBtn);
     }
 
@@ -159,8 +162,27 @@ class ClockPrecisionApp {
         const isVisible = this.calibrationPanel.style.display !== 'none';
         console.log('Current display:', this.calibrationPanel.style.display, 'isVisible:', isVisible);
         
-        this.calibrationPanel.style.display = isVisible ? 'none' : 'block';
-        this.calibrateBtn.textContent = isVisible ? 'Kalibreren' : 'Verberg Kalibratie';
+        if (isVisible) {
+            // Switch back to measurement screen
+            this.calibrationPanel.style.display = 'none';
+            this.calibrateBtn.textContent = 'Kalibreren';
+            this.startBtn.style.display = '';
+            this.stopBtn.style.display = '';
+            this.resetBtn.style.display = '';
+            if (this.measurementsSection) {
+                this.measurementsSection.style.display = '';
+            }
+        } else {
+            // Switch to calibration screen
+            this.calibrationPanel.style.display = 'block';
+            this.calibrateBtn.textContent = 'Meten';
+            this.startBtn.style.display = 'none';
+            this.stopBtn.style.display = 'none';
+            this.resetBtn.style.display = 'none';
+            if (this.measurementsSection) {
+                this.measurementsSection.style.display = 'none';
+            }
+        }
         
         console.log('New display:', this.calibrationPanel.style.display);
     }
