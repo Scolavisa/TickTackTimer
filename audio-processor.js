@@ -7,7 +7,6 @@ class AudioProcessor {
         this.frequencyData = null;
         this.isListening = false;
         this.threshold = 0.3; // 30% default threshold
-        this.detectionMethod = 'amplitude'; // 'amplitude' or 'frequency'
         
         // Frequency band settings for different clock types
         this.frequencyPresets = {
@@ -29,11 +28,6 @@ class AudioProcessor {
         this.isWaitingForTak = false;
         this.currentBatch = [];
         this.targetBatchSize = 10; // 10 tik-tak pairs
-        
-        // Frequency analysis for tik/tak distinction
-        this.tikFrequencyProfile = null;
-        this.takFrequencyProfile = null;
-        this.isLearningPhase = true;
         
         // Callbacks
         this.onTick = null;
@@ -105,7 +99,6 @@ class AudioProcessor {
         this.lastTickTime = null;
         this.isWaitingForTak = false;
         this.currentBatch = [];
-        this.isLearningPhase = true;
         
         if (!this.isProcessing) {
             this.processAudio();
@@ -169,11 +162,6 @@ class AudioProcessor {
         this.threshold = threshold / 100; // Convert percentage to decimal
     }
 
-    setDetectionMethod(method) {
-        this.detectionMethod = method;
-        console.log(`Detection method set to: ${method}`);
-    }
-
     processAudio() {
         if (!this.isListening) {
             this.isProcessing = false;
@@ -214,57 +202,14 @@ class AudioProcessor {
             console.log(`Audio levels - Freq: ${(level * 100).toFixed(1)}%, Time: ${(timeDomainRms * 100).toFixed(1)}%, Final: ${(finalLevel * 100).toFixed(1)}%, Threshold: ${(this.threshold * 100).toFixed(1)}%`);
         }
 
-        // Check for tick detection based on method
-        let shouldDetect = false;
-        if (this.detectionMethod === 'amplitude') {
-            shouldDetect = finalLevel > this.threshold;
-        } else if (this.detectionMethod === 'frequency') {
-            shouldDetect = this.detectByFrequency();
-        }
-
-        if (shouldDetect) {
-            console.log(`Tick detected! Level: ${(finalLevel * 100).toFixed(1)}%, Method: ${this.detectionMethod}`);
+        // Check for tick detection
+        if (finalLevel > this.threshold) {
+            console.log(`Tick detected! Level: ${(finalLevel * 100).toFixed(1)}%`);
             this.detectTick();
         }
 
         // Continue processing
         requestAnimationFrame(() => this.processAudio());
-    }
-
-    detectByFrequency() {
-        // Get current frequency range from preset
-        const freqRange = this.getCurrentFrequencyRange();
-        
-        // Calculate energy in specific frequency bands for clock sounds
-        let totalEnergy = 0;
-        let clockBandEnergy = 0;
-        
-        // Use preset frequency range
-        const startBin = Math.floor(freqRange.min * this.analyser.fftSize / this.audioContext.sampleRate);
-        const endBin = Math.floor(freqRange.max * this.analyser.fftSize / this.audioContext.sampleRate);
-        
-        // Calculate total energy across all frequencies
-        for (let i = 0; i < this.frequencyData.length; i++) {
-            const magnitude = this.frequencyData[i] / 255;
-            totalEnergy += magnitude;
-        }
-        
-        // Calculate energy in clock frequency band
-        for (let i = startBin; i < endBin && i < this.frequencyData.length; i++) {
-            const magnitude = this.frequencyData[i] / 255;
-            clockBandEnergy += magnitude;
-        }
-        
-        // Only detect if:
-        // 1. There's significant energy in the clock band
-        // 2. The clock band energy is a significant portion of total energy
-        const clockBandRatio = totalEnergy > 0 ? clockBandEnergy / totalEnergy : 0;
-        const hasClockSignal = clockBandEnergy > this.threshold && clockBandRatio > 0.15;
-        
-        // Additional noise filtering: require minimum total energy
-        const minTotalEnergy = this.threshold * 0.8;
-        
-        return hasClockSignal && totalEnergy > minTotalEnergy;
     }
 
     detectTick() {
@@ -308,11 +253,6 @@ class AudioProcessor {
             this.lastTickTime = currentTime;
             this.isWaitingForTak = true;
             
-            // Store frequency profile for learning
-            if (this.isLearningPhase) {
-                this.tikFrequencyProfile = this.getFrequencyProfile();
-            }
-            
             if (this.onTick) {
                 this.onTick('tik', currentTime);
             }
@@ -321,11 +261,6 @@ class AudioProcessor {
             const tikTime = this.lastTickTime;
             const takTime = currentTime;
             const interval = takTime - tikTime;
-            
-            // Store frequency profile for learning
-            if (this.isLearningPhase) {
-                this.takFrequencyProfile = this.getFrequencyProfile();
-            }
             
             // Add to current batch
             this.addToBatch(tikTime, takTime, interval);
@@ -348,39 +283,6 @@ class AudioProcessor {
                 this.completeBatch();
             }
         }
-    }
-
-    getFrequencyProfile() {
-        // Create a simplified frequency profile for tik/tak distinction
-        const profile = {
-            lowFreq: 0,    // 0-1000Hz
-            midFreq: 0,    // 1000-3000Hz  
-            highFreq: 0,   // 3000Hz+
-            spectralCentroid: 0
-        };
-        
-        let totalEnergy = 0;
-        let weightedSum = 0;
-        
-        for (let i = 0; i < this.frequencyData.length; i++) {
-            const frequency = i * this.audioContext.sampleRate / this.analyser.fftSize;
-            const magnitude = this.frequencyData[i] / 255;
-            
-            if (frequency < 1000) {
-                profile.lowFreq += magnitude;
-            } else if (frequency < 3000) {
-                profile.midFreq += magnitude;
-            } else {
-                profile.highFreq += magnitude;
-            }
-            
-            totalEnergy += magnitude;
-            weightedSum += frequency * magnitude;
-        }
-        
-        profile.spectralCentroid = totalEnergy > 0 ? weightedSum / totalEnergy : 0;
-        
-        return profile;
     }
 
     addToBatch(tikTime, takTime, interval) {
@@ -480,7 +382,6 @@ class AudioProcessor {
         this.currentBatch = [];
         this.lastTickTime = null;
         this.isWaitingForTak = false;
-        this.isLearningPhase = true;
     }
 
     destroy() {
