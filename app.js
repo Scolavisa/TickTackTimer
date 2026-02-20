@@ -3,6 +3,7 @@ class ClockPrecisionApp {
         this.audioProcessor = new AudioProcessor();
         this.measurements = [];
         this.isRecording = false;
+        this.isCalibrating = false;
         this.currentMeasurementId = 0;
         
         this.initializeElements();
@@ -24,7 +25,6 @@ class ClockPrecisionApp {
         this.minFreq = document.getElementById('minFreq');
         this.maxFreq = document.getElementById('maxFreq');
         this.startCalibrationBtn = document.getElementById('startCalibrationBtn');
-        this.stopCalibrationBtn = document.getElementById('stopCalibrationBtn');
         this.tickCounter = document.getElementById('tickCounter');
         this.timeRemaining = document.getElementById('timeRemaining');
         this.calibrationAdvice = document.getElementById('calibrationAdvice');
@@ -49,6 +49,9 @@ class ClockPrecisionApp {
         // History
         this.historyList = document.getElementById('measurementHistory');
         
+        // Measurements section
+        this.measurementsSection = document.getElementById('measurementsSection');
+        
         console.log('Elements initialized. CalibrateBtn:', this.calibrateBtn);
     }
 
@@ -71,10 +74,7 @@ class ClockPrecisionApp {
         
         // Calibration controls
         if (this.startCalibrationBtn) {
-            this.startCalibrationBtn.addEventListener('click', () => this.startCalibrationTest());
-        }
-        if (this.stopCalibrationBtn) {
-            this.stopCalibrationBtn.addEventListener('click', () => this.stopCalibrationTest());
+            this.startCalibrationBtn.addEventListener('click', () => this.toggleCalibrationTest());
         }
         
         if (this.frequencyPreset) {
@@ -159,8 +159,27 @@ class ClockPrecisionApp {
         const isVisible = this.calibrationPanel.style.display !== 'none';
         console.log('Current display:', this.calibrationPanel.style.display, 'isVisible:', isVisible);
         
-        this.calibrationPanel.style.display = isVisible ? 'none' : 'block';
-        this.calibrateBtn.textContent = isVisible ? 'Kalibreren' : 'Verberg Kalibratie';
+        if (isVisible) {
+            // Switch back to measurement screen
+            this.calibrationPanel.style.display = 'none';
+            this.calibrateBtn.textContent = 'Kalibreren';
+            this.startBtn.style.display = '';
+            this.stopBtn.style.display = '';
+            this.resetBtn.style.display = '';
+            if (this.measurementsSection) {
+                this.measurementsSection.style.display = '';
+            }
+        } else {
+            // Switch to calibration screen
+            this.calibrationPanel.style.display = 'block';
+            this.calibrateBtn.textContent = 'Meten';
+            this.startBtn.style.display = 'none';
+            this.stopBtn.style.display = 'none';
+            this.resetBtn.style.display = 'none';
+            if (this.measurementsSection) {
+                this.measurementsSection.style.display = 'none';
+            }
+        }
         
         console.log('New display:', this.calibrationPanel.style.display);
     }
@@ -180,10 +199,20 @@ class ClockPrecisionApp {
         this.calibrationAdvice.className = 'calibration-advice';
     }
 
+    toggleCalibrationTest() {
+        if (this.isCalibrating) {
+            this.stopCalibrationTest();
+        } else {
+            this.startCalibrationTest();
+        }
+    }
+
     async startCalibrationTest() {
         try {
-            this.startCalibrationBtn.disabled = true;
-            this.stopCalibrationBtn.disabled = false;
+            this.isCalibrating = true;
+            this.startCalibrationBtn.textContent = 'Stop Test';
+            this.startCalibrationBtn.classList.remove('primary');
+            this.startCalibrationBtn.classList.add('secondary');
             
             // Initialize audio processor if not already done
             if (!this.audioProcessor.audioContext) {
@@ -214,8 +243,10 @@ class ClockPrecisionApp {
     }
 
     resetCalibrationUI() {
-        this.startCalibrationBtn.disabled = false;
-        this.stopCalibrationBtn.disabled = true;
+        this.isCalibrating = false;
+        this.startCalibrationBtn.textContent = 'Start Test (10s)';
+        this.startCalibrationBtn.classList.remove('secondary');
+        this.startCalibrationBtn.classList.add('primary');
         this.tickCounter.textContent = '0';
         this.timeRemaining.textContent = '10s';
     }
