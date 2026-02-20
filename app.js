@@ -3,6 +3,7 @@ class ClockPrecisionApp {
         this.audioProcessor = new AudioProcessor();
         this.measurements = [];
         this.isRecording = false;
+        this.isCalibrating = false;
         this.currentMeasurementId = 0;
         
         this.initializeElements();
@@ -24,7 +25,6 @@ class ClockPrecisionApp {
         this.minFreq = document.getElementById('minFreq');
         this.maxFreq = document.getElementById('maxFreq');
         this.startCalibrationBtn = document.getElementById('startCalibrationBtn');
-        this.stopCalibrationBtn = document.getElementById('stopCalibrationBtn');
         this.tickCounter = document.getElementById('tickCounter');
         this.timeRemaining = document.getElementById('timeRemaining');
         this.calibrationAdvice = document.getElementById('calibrationAdvice');
@@ -74,10 +74,7 @@ class ClockPrecisionApp {
         
         // Calibration controls
         if (this.startCalibrationBtn) {
-            this.startCalibrationBtn.addEventListener('click', () => this.startCalibrationTest());
-        }
-        if (this.stopCalibrationBtn) {
-            this.stopCalibrationBtn.addEventListener('click', () => this.stopCalibrationTest());
+            this.startCalibrationBtn.addEventListener('click', () => this.toggleCalibrationTest());
         }
         
         if (this.frequencyPreset) {
@@ -202,10 +199,20 @@ class ClockPrecisionApp {
         this.calibrationAdvice.className = 'calibration-advice';
     }
 
+    toggleCalibrationTest() {
+        if (this.isCalibrating) {
+            this.stopCalibrationTest();
+        } else {
+            this.startCalibrationTest();
+        }
+    }
+
     async startCalibrationTest() {
         try {
-            this.startCalibrationBtn.disabled = true;
-            this.stopCalibrationBtn.disabled = false;
+            this.isCalibrating = true;
+            this.startCalibrationBtn.textContent = 'Stop Test';
+            this.startCalibrationBtn.classList.remove('primary');
+            this.startCalibrationBtn.classList.add('secondary');
             
             // Initialize audio processor if not already done
             if (!this.audioProcessor.audioContext) {
@@ -236,8 +243,10 @@ class ClockPrecisionApp {
     }
 
     resetCalibrationUI() {
-        this.startCalibrationBtn.disabled = false;
-        this.stopCalibrationBtn.disabled = true;
+        this.isCalibrating = false;
+        this.startCalibrationBtn.textContent = 'Start Test (10s)';
+        this.startCalibrationBtn.classList.remove('secondary');
+        this.startCalibrationBtn.classList.add('primary');
         this.tickCounter.textContent = '0';
         this.timeRemaining.textContent = '10s';
     }
