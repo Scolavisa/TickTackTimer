@@ -1,3 +1,5 @@
+import { AudioProcessor } from './audio-processor.js'
+
 class ClockPrecisionApp {
     constructor() {
         this.audioProcessor = new AudioProcessor();

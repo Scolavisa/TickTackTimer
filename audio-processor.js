@@ -396,3 +396,4 @@ class AudioProcessor {
         }
     }
 }
+export { AudioProcessor };
