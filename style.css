@@ -227,26 +227,55 @@ main {
 
 .threshold-control {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.threshold-control input {
-    flex: 1;
+.threshold-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.threshold-header label {
+    font-weight: bold;
+}
+
+.threshold-header span {
+    font-weight: bold;
+    color: #667eea;
+}
+
+.threshold-sensitivity {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.threshold-control input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.threshold-steps {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.threshold-btn {
+    padding: 6px 14px;
+    font-size: 1rem;
+    border-radius: 6px;
+    background: #667eea;
+    color: white;
+    min-width: 48px;
+    touch-action: manipulation;
 }
 
 .settings-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    align-items: center;
-}
-
-.detection-method select {
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
+    margin-top: 5px;
 }
 
 .progress-display {
@@ -472,11 +501,6 @@ main {
 }
 
 @media (max-width: 600px) {
-    .settings-row {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
     .tick-breakdown {
         grid-template-columns: 1fr;
     }
@@ -508,27 +532,15 @@ main {
         width: 100%;
     }
     
-    .threshold-control {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-    
-    .threshold-control label {
-        text-align: left;
-    }
-    
-    .threshold-control input {
+    .threshold-control input[type="range"] {
         width: 100%;
     }
     
-    .detection-method {
-        display: flex;
-        flex-direction: column;
+    .threshold-steps {
         gap: 8px;
     }
     
-    .detection-method label {
-        text-align: left;
+    .threshold-btn {
+        flex: 1;
     }
 }

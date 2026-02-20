@@ -76,16 +76,21 @@
                 </div>
                 <div class="settings-row">
                     <div class="threshold-control">
-                        <label for="threshold">Detectie Drempel:</label>
-                        <input type="range" id="threshold" min="0" max="100" value="30">
-                        <span id="thresholdValue">30%</span>
-                    </div>
-                    <div class="detection-method">
-                        <label for="detectionMethod">Detectie Methode:</label>
-                        <select id="detectionMethod">
-                            <option value="amplitude">Amplitude (Geluidsniveau)</option>
-                            <option value="frequency">Frequentie Analyse</option>
-                        </select>
+                        <div class="threshold-header">
+                            <label for="threshold">Detectie Drempel:</label>
+                            <span id="thresholdValue">30%</span>
+                        </div>
+                        <div class="threshold-sensitivity" id="thresholdSensitivity">
+                            <span>← Meer gevoelig</span>
+                            <span>Minder gevoelig →</span>
+                        </div>
+                        <input type="range" id="threshold" min="0" max="100" value="30" aria-describedby="thresholdSensitivity">
+                        <div class="threshold-steps">
+                            <button class="btn threshold-btn" id="thresholdDown5">−5</button>
+                            <button class="btn threshold-btn" id="thresholdDown1">−1</button>
+                            <button class="btn threshold-btn" id="thresholdUp1">+1</button>
+                            <button class="btn threshold-btn" id="thresholdUp5">+5</button>
+                        </div>
                     </div>
                 </div>
             </div>

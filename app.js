@@ -33,7 +33,10 @@ class ClockPrecisionApp {
         this.thresholdSlider = document.getElementById('threshold');
         this.thresholdValue = document.getElementById('thresholdValue');
         this.levelIndicator = document.getElementById('levelIndicator');
-        this.detectionMethodSelect = document.getElementById('detectionMethod');
+        this.thresholdDown5 = document.getElementById('thresholdDown5');
+        this.thresholdDown1 = document.getElementById('thresholdDown1');
+        this.thresholdUp1 = document.getElementById('thresholdUp1');
+        this.thresholdUp5 = document.getElementById('thresholdUp5');
         
         // Progress display
         this.progressFill = document.getElementById('progressFill');
@@ -95,14 +98,24 @@ class ClockPrecisionApp {
         }
         
         this.thresholdSlider.addEventListener('input', (e) => {
-            const value = e.target.value;
-            this.thresholdValue.textContent = value + '%';
-            this.audioProcessor.setThreshold(value);
+            this.updateThreshold(parseInt(e.target.value));
         });
-        
-        this.detectionMethodSelect.addEventListener('change', (e) => {
-            this.audioProcessor.setDetectionMethod(e.target.value);
-        });
+
+        const adjustThreshold = (delta) => {
+            const next = Math.min(100, Math.max(0, parseInt(this.thresholdSlider.value) + delta));
+            this.thresholdSlider.value = next;
+            this.updateThreshold(next);
+        };
+
+        this.thresholdDown5.addEventListener('click', () => adjustThreshold(-5));
+        this.thresholdDown1.addEventListener('click', () => adjustThreshold(-1));
+        this.thresholdUp1.addEventListener('click', () => adjustThreshold(1));
+        this.thresholdUp5.addEventListener('click', () => adjustThreshold(5));
+    }
+
+    updateThreshold(value) {
+        this.thresholdValue.textContent = value + '%';
+        this.audioProcessor.setThreshold(value);
     }
 
     setupAudioCallbacks() {
@@ -219,8 +232,7 @@ class ClockPrecisionApp {
                 await this.audioProcessor.initialize();
             }
             
-            // Set detection method and frequency preset
-            this.audioProcessor.setDetectionMethod(this.detectionMethodSelect.value);
+            // Set frequency preset
             this.audioProcessor.setFrequencyPreset(this.frequencyPreset.value);
             
             // Start calibration
@@ -288,9 +300,6 @@ class ClockPrecisionApp {
             if (!this.audioProcessor.audioContext) {
                 await this.audioProcessor.initialize();
             }
-            
-            // Set detection method
-            this.audioProcessor.setDetectionMethod(this.detectionMethodSelect.value);
             
             // Start listening
             this.audioProcessor.startListening();
