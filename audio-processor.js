@@ -29,6 +29,12 @@ class AudioProcessor {
         this.currentBatch = [];
         this.targetBatchSize = 10; // 10 tik-tak pairs
         
+        // Peak level tracking for peak meter
+        this.peakLevel = 0;
+        this.peakHoldStartTime = null;
+        this.peakHoldDuration = 1500; // ms to hold peak before decaying
+        this.peakDecayRate = 0.003; // decay per animation frame (frame-rate dependent; ~0.18/s at 60 fps, faster on high-refresh displays)
+
         // Callbacks
         this.onTick = null;
         this.onLevelUpdate = null;
@@ -192,9 +198,21 @@ class AudioProcessor {
         // Use the higher of the two for better detection
         const finalLevel = Math.max(level, timeDomainRms);
         
+        // Update peak level with hold and decay
+        const now = performance.now();
+        if (finalLevel >= this.peakLevel) {
+            this.peakLevel = finalLevel;
+            this.peakHoldStartTime = now;
+        } else if (this.peakHoldStartTime !== null && (now - this.peakHoldStartTime) > this.peakHoldDuration) {
+            this.peakLevel = Math.max(0, this.peakLevel - this.peakDecayRate);
+            if (this.peakLevel === 0) {
+                this.peakHoldStartTime = null;
+            }
+        }
+
         // Update level indicator
         if (this.onLevelUpdate) {
-            this.onLevelUpdate(finalLevel);
+            this.onLevelUpdate(finalLevel, this.peakLevel);
         }
 
         // Debug: log audio levels more frequently for troubleshooting
@@ -382,6 +400,8 @@ class AudioProcessor {
         this.currentBatch = [];
         this.lastTickTime = null;
         this.isWaitingForTak = false;
+        this.peakLevel = 0;
+        this.peakHoldStartTime = null;
     }
 
     destroy() {
