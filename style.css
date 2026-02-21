@@ -81,6 +81,11 @@ main {
     color: white;
 }
 
+.btn.factory-reset {
+    background: #FF5722;
+    color: white;
+}
+
 .calibration-panel {
     background: #f0f8ff;
     border: 2px solid #667eea;
