@@ -16,6 +16,37 @@ When you start a measurement session. The app will listen until it has heard the
 will show the difference between the two in milliseconds and percentage. It also populates a table with the previous 
 measurements so you can track your progress.
 
+## Deployment (GitHub Pages)
+
+The app is deployed automatically to [https://ttt.scolavisa.eu](https://ttt.scolavisa.eu) via GitHub Actions whenever
+changes are pushed to the `main` branch.
+
+### Enabling GitHub Pages (one-time setup)
+
+1. Go to **Settings → Pages** in the repository.
+2. Under **Build and deployment**, set the source to **GitHub Actions**.
+3. Set the **Custom domain** to `ttt.scolavisa.eu` and save.
+4. Enable **Enforce HTTPS** once the domain has been verified.
+
+### DNS configuration
+
+Replace any existing `ttt` A record with a CNAME record:
+
+| Type  | Name | Value                 |
+|-------|------|-----------------------|
+| CNAME | ttt  | scolavisa.github.io   |
+
+After updating the DNS record, allow time for propagation (up to 48 hours, though usually much faster). GitHub will
+automatically provision a TLS certificate once the CNAME resolves correctly.
+
+### PWA notes
+
+- The service worker is registered with `registerType: 'autoUpdate'`, so users receive updates automatically when a new
+  version is deployed—no manual refresh required.
+- If a user has the app installed as a PWA and a new build is deployed, the service worker will update in the
+  background and activate on the next page load.
+- `start_url: '/'` is correct for a custom-domain deployment and should not be changed.
+
 ## Technical stuff
 This app uses as little code as possible. No framework, just plain HTML, JavaScript and a little bit of CSS.
 For time measurement it uses the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API). This 
