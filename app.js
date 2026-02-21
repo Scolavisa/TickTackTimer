@@ -36,6 +36,7 @@ class ClockPrecisionApp {
         this.thresholdSlider = document.getElementById('threshold');
         this.thresholdValue = document.getElementById('thresholdValue');
         this.levelIndicator = document.getElementById('levelIndicator');
+        this.peakIndicator = document.getElementById('peakIndicator');
         this.thresholdDown5 = document.getElementById('thresholdDown5');
         this.thresholdDown1 = document.getElementById('thresholdDown1');
         this.thresholdUp1 = document.getElementById('thresholdUp1');
@@ -170,9 +171,19 @@ class ClockPrecisionApp {
 
     setupAudioCallbacks() {
         // Audio level updates
-        this.audioProcessor.onLevelUpdate = (level) => {
+        this.audioProcessor.onLevelUpdate = (level, peakLevel) => {
             const percentage = Math.round(level * 100);
             this.levelIndicator.style.width = Math.min(percentage, 100) + '%';
+
+            // Update peak indicator stripe
+            if (peakLevel > 0) {
+                // Cap at 97% to keep the 3px stripe fully visible within the level bar container
+                const peakPercentage = Math.min(Math.round(peakLevel * 100), 97);
+                this.peakIndicator.style.display = 'block';
+                this.peakIndicator.style.left = peakPercentage + '%';
+            } else {
+                this.peakIndicator.style.display = 'none';
+            }
         };
 
         // Tick detection feedback

@@ -221,6 +221,18 @@ main {
     border-radius: 10px;
     overflow: hidden;
     margin-top: 5px;
+    position: relative;
+}
+
+.peak-indicator {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: white;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.9), 0 0 2px rgba(0, 0, 0, 0.4);
+    display: none;
+    pointer-events: none;
 }
 
 .level-fill {
