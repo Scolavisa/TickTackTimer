@@ -11,6 +11,7 @@ class ClockPrecisionApp {
         this.initializeElements();
         this.setupEventListeners();
         this.setupAudioCallbacks();
+        this.loadCalibrationSettings();
     }
 
     initializeElements() {
@@ -57,6 +58,9 @@ class ClockPrecisionApp {
         // Measurements section
         this.measurementsSection = document.getElementById('measurementsSection');
         
+        // Calibration factory reset
+        this.factoryResetBtn = document.getElementById('factoryResetBtn');
+        
         console.log('Elements initialized. CalibrateBtn:', this.calibrateBtn);
     }
 
@@ -99,6 +103,10 @@ class ClockPrecisionApp {
             this.maxFreq.addEventListener('change', () => this.updateCustomFrequency());
         }
         
+        if (this.factoryResetBtn) {
+            this.factoryResetBtn.addEventListener('click', () => this.factoryReset());
+        }
+
         this.thresholdSlider.addEventListener('input', (e) => {
             this.updateThreshold(parseInt(e.target.value));
         });
@@ -118,6 +126,46 @@ class ClockPrecisionApp {
     updateThreshold(value) {
         this.thresholdValue.textContent = value + '%';
         this.audioProcessor.setThreshold(value);
+    }
+
+    loadCalibrationSettings() {
+        const preset = localStorage.getItem('clockapp_frequencyPreset');
+        const threshold = localStorage.getItem('clockapp_threshold');
+
+        if (preset && this.frequencyPreset) {
+            this.frequencyPreset.value = preset;
+            this.audioProcessor.setFrequencyPreset(preset);
+            if (this.customFreqGroup) {
+                this.customFreqGroup.style.display = preset === 'custom' ? 'block' : 'none';
+            }
+        }
+
+        if (threshold !== null && this.thresholdSlider) {
+            const value = parseInt(threshold);
+            this.thresholdSlider.value = value;
+            this.updateThreshold(value);
+        }
+    }
+
+    saveCalibrationSettings() {
+        localStorage.setItem('clockapp_frequencyPreset', this.frequencyPreset.value);
+        localStorage.setItem('clockapp_threshold', this.thresholdSlider.value);
+    }
+
+    factoryReset() {
+        localStorage.removeItem('clockapp_frequencyPreset');
+        localStorage.removeItem('clockapp_threshold');
+
+        if (this.frequencyPreset) {
+            this.frequencyPreset.value = 'medium';
+            this.audioProcessor.setFrequencyPreset('medium');
+            if (this.customFreqGroup) {
+                this.customFreqGroup.style.display = 'none';
+            }
+        }
+
+        this.thresholdSlider.value = 30;
+        this.updateThreshold(30);
     }
 
     setupAudioCallbacks() {
@@ -285,6 +333,7 @@ class ClockPrecisionApp {
         } else {
             advice = tickCount + ' tikken gedetecteerd (' + ticksPerSecond.toFixed(1) + '/s). Goede instelling!';
             adviceClass = 'calibration-advice';
+            this.saveCalibrationSettings();
         }
         
         this.calibrationAdvice.textContent = advice;
