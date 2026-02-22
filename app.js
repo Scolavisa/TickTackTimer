@@ -15,11 +15,16 @@ class ClockPrecisionApp {
     }
 
     initializeElements() {
-        // Control buttons
+        // Control buttons (Meten, Kalibreren, Instellingen altijd zichtbaar)
+        this.metenBtn = document.getElementById('metenBtn');
         this.calibrateBtn = document.getElementById('calibrateBtn');
         this.startBtn = document.getElementById('startBtn');
         this.stopBtn = document.getElementById('stopBtn');
         this.resetBtn = document.getElementById('resetBtn');
+        this.settingsBtn = document.getElementById('settingsBtn');
+        
+        // Settings
+        this.settingsPanel = document.getElementById('settingsPanel');
         
         // Calibration elements
         this.calibrationPanel = document.getElementById('calibrationPanel');
@@ -56,8 +61,10 @@ class ClockPrecisionApp {
         // History
         this.historyList = document.getElementById('measurementHistory');
         
-        // Measurements section
+        // Meten sectie (bevat meetknoppen, status, metingen)
+        this.metenSection = document.getElementById('metenSection');
         this.measurementsSection = document.getElementById('measurementsSection');
+        this.statusSection = document.getElementById('statusSection');
         
         // Calibration factory reset
         this.factoryResetBtn = document.getElementById('factoryResetBtn');
@@ -68,19 +75,18 @@ class ClockPrecisionApp {
     setupEventListeners() {
         console.log('Setting up event listeners');
         
-        if (this.calibrateBtn) {
-            this.calibrateBtn.addEventListener('click', () => {
-                console.log('Calibrate button clicked!');
-                this.toggleCalibration();
-            });
-            console.log('Calibrate button listener added');
-        } else {
-            console.error('calibrateBtn not found!');
+        if (this.metenBtn) {
+            this.metenBtn.addEventListener('click', () => this.showMetenView());
         }
-        
+        if (this.calibrateBtn) {
+            this.calibrateBtn.addEventListener('click', () => this.showCalibrationView());
+        }
         this.startBtn.addEventListener('click', () => this.startMeasurement());
         this.stopBtn.addEventListener('click', () => this.stopMeasurement());
         this.resetBtn.addEventListener('click', () => this.resetMeasurements());
+        if (this.settingsBtn && this.settingsPanel) {
+            this.settingsBtn.addEventListener('click', () => this.showSettingsView());
+        }
         
         // Calibration controls
         if (this.startCalibrationBtn) {
@@ -221,41 +227,25 @@ class ClockPrecisionApp {
         };
     }
 
-    toggleCalibration() {
-        console.log('toggleCalibration called');
-        console.log('calibrationPanel:', this.calibrationPanel);
-        
-        if (!this.calibrationPanel) {
-            console.error('calibrationPanel not found!');
-            return;
-        }
-        
-        const isVisible = this.calibrationPanel.style.display !== 'none';
-        console.log('Current display:', this.calibrationPanel.style.display, 'isVisible:', isVisible);
-        
-        if (isVisible) {
-            // Switch back to measurement screen
-            this.calibrationPanel.style.display = 'none';
-            this.calibrateBtn.textContent = 'Kalibreren';
-            this.startBtn.style.display = '';
-            this.stopBtn.style.display = '';
-            this.resetBtn.style.display = '';
-            if (this.measurementsSection) {
-                this.measurementsSection.style.display = '';
-            }
-        } else {
-            // Switch to calibration screen
-            this.calibrationPanel.style.display = 'block';
-            this.calibrateBtn.textContent = 'Meten';
-            this.startBtn.style.display = 'none';
-            this.stopBtn.style.display = 'none';
-            this.resetBtn.style.display = 'none';
-            if (this.measurementsSection) {
-                this.measurementsSection.style.display = 'none';
-            }
-        }
-        
-        console.log('New display:', this.calibrationPanel.style.display);
+    /** Toon alleen de meten-sectie. */
+    showMetenView() {
+        if (this.calibrationPanel) this.calibrationPanel.style.display = 'none';
+        if (this.settingsPanel) this.settingsPanel.style.display = 'none';
+        if (this.metenSection) this.metenSection.style.display = '';
+    }
+
+    /** Toon alleen de kalibratie-sectie. */
+    showCalibrationView() {
+        if (this.calibrationPanel) this.calibrationPanel.style.display = 'block';
+        if (this.settingsPanel) this.settingsPanel.style.display = 'none';
+        if (this.metenSection) this.metenSection.style.display = 'none';
+    }
+
+    /** Toon alleen de instellingen-sectie. */
+    showSettingsView() {
+        if (this.calibrationPanel) this.calibrationPanel.style.display = 'none';
+        if (this.settingsPanel) this.settingsPanel.style.display = 'block';
+        if (this.metenSection) this.metenSection.style.display = 'none';
     }
 
     updateCustomFrequency() {
