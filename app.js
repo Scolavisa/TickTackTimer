@@ -291,10 +291,10 @@ class ClockPrecisionApp {
         };
 
         // Progress updates
-        this.audioProcessor.onProgress = (clickCount, elapsed, remaining) => {
+        this.audioProcessor.onProgress = (clickCount, elapsed) => {
             const percentage = Math.min((elapsed / this.samplingDuration) * 100, 100);
             this.progressFill.style.width = percentage + '%';            
-            this.progressText.textContent = t('progressPairs', { current, total });
+            this.progressText.textContent = t('progressPairs', { current: clickCount, total: '...' });
         };
 
         // Batch completion
