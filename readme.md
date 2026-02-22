@@ -12,9 +12,42 @@ filter out noise. Once you are satisfied that the app can distinguish the tick a
 for your actual measurements.
 
 ## Measurements
-When you start a measurement session. The app will listen until it has heard the tick and tack sounds 10 times. Then it 
-will show the difference between the two in milliseconds and percentage. It also populates a table with the previous 
-measurements so you can track your progress.
+When you start a measurement session the app listens for a configurable sampling time (10, 20 or 30 seconds, set in
+Settings). All detected clicks are collected during that period. After the sampling time the app analyses the result
+and shows it.
+
+## Settings
+The sampling time can be set to 10, 20 or 30 seconds via the Settings screen. The longer the sampling time, the more
+samples are collected, which increases the accuracy of the measurement. The setting is saved and remembered for the
+next session.
+
+## Meetmethode en algoritme
+
+During the sampling time the app records the timestamp of every detected click (tick or tack). These alternate between
+tick and tack:
+
+```
+time:   0                       10  (seconds – the sampling time)
+tick:   |            |           |
+tack:           |           |
+sample: |..t1.../.t2.|..t1../.t2.|
+```
+
+- **t1** is the interval from a tick to the following tack.
+- **t2** is the interval from a tack to the following tick.
+
+After collecting all clicks the app discards the last click when an even number was detected (an even count means the
+last click does not contribute a complete t1–t2 pair). It then computes:
+
+| Value | Description |
+|-------|-------------|
+| **t1 gemiddelde** | Mean of all t1 intervals (ms) |
+| **t2 gemiddelde** | Mean of all t2 intervals (ms) |
+| **Balans** | `smallest(t1mean, t2mean) / largest(t1mean, t2mean) × 100 %` |
+| **Aantal samples** | Number of complete t1–t2 pairs used |
+
+A **Balans** of 100 % means a perfectly balanced clock. The lower the value the more the pendulum needs adjusting.
+Because we use the smallest/largest ratio it does not matter whether we hear the tick or the tack first.
 
 ## Running locally
 

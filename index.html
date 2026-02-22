@@ -76,7 +76,14 @@
             <div class="settings-panel" id="settingsPanel" style="display: none;">
                 <h3>Instellingen</h3>
                 <div class="settings-content">
-                    <p class="settings-intro">Extra opties en voorkeuren.</p>
+                    <div class="setting-group">
+                        <label for="samplingTime">Meettijd:</label>
+                        <select id="samplingTime">
+                            <option value="10" selected>10 seconden</option>
+                            <option value="20">20 seconden</option>
+                            <option value="30">30 seconden</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -127,18 +134,22 @@
                         </div>
                         <div id="currentResult" class="current-result" style="display: none;">
                             <div class="result-summary">
-                                <div class="total-deviation">
-                                    <span class="label">Totale Afwijking:</span>
-                                    <span id="totalDeviation" class="value">-</span>
-                                </div>
                                 <div class="tick-breakdown">
                                     <div class="tick-result">
-                                        <span class="label">Langere Intervals:</span>
-                                        <span id="avgTikDeviation" class="value">-</span>
+                                        <span class="label">t1 gemiddelde:</span>
+                                        <span id="t1Mean" class="value">-</span>
                                     </div>
                                     <div class="tick-result">
-                                        <span class="label">Kortere Intervals:</span>
-                                        <span id="avgTakDeviation" class="value">-</span>
+                                        <span class="label">t2 gemiddelde:</span>
+                                        <span id="t2Mean" class="value">-</span>
+                                    </div>
+                                    <div class="tick-result">
+                                        <span class="label">Balans:</span>
+                                        <span id="balance" class="value">-</span>
+                                    </div>
+                                    <div class="tick-result">
+                                        <span class="label">Aantal samples:</span>
+                                        <span id="nrSamples" class="value">-</span>
                                     </div>
                                 </div>
                             </div>
