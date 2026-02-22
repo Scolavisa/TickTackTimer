@@ -19,10 +19,9 @@
 
         <main>
             <div class="controls">
+                <button id="metenBtn" class="btn">Meten</button>
                 <button id="calibrateBtn" class="btn calibrate">Kalibreren</button>
-                <button id="startBtn" class="btn primary">Start Meting</button>
-                <button id="stopBtn" class="btn secondary" disabled>Stop Meting</button>
-                <button id="resetBtn" class="btn">Reset</button>
+                <button id="settingsBtn" class="btn">Instellingen</button>
             </div>
 
             <div class="calibration-panel" id="calibrationPanel" style="display: none;">
@@ -74,7 +73,20 @@
                 </div>
             </div>
 
-            <div class="status">
+            <div class="settings-panel" id="settingsPanel" style="display: none;">
+                <h3>Instellingen</h3>
+                <div class="settings-content">
+                    <p class="settings-intro">Extra opties en voorkeuren.</p>
+                </div>
+            </div>
+
+            <div class="meten-section" id="metenSection">
+                <div class="meten-controls">
+                    <button id="startBtn" class="btn primary">Start Meting</button>
+                    <button id="stopBtn" class="btn secondary" disabled style="display: none;">Stop Meting</button>
+                    <button id="resetBtn" class="btn">Reset</button>
+                </div>
+                <div class="status" id="statusSection">
                 <div class="audio-level">
                     <label>Audio Niveau:</label>
                     <div class="level-bar">
@@ -101,9 +113,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
 
-            <div class="measurements" id="measurementsSection">
+                <div class="measurements" id="measurementsSection">
                 <div class="current-measurement">
                     <h3>Huidige Meting</h3>
                     <div class="measurement-status">
@@ -139,6 +151,7 @@
                     <div id="measurementHistory" class="history-list">
                         <!-- Metingen worden hier toegevoegd -->
                     </div>
+                </div>
                 </div>
             </div>
         </main>
