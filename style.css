@@ -40,6 +40,23 @@ main {
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
+footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+}
+
+footer a {
+    color: white;
+    text-decoration: underline;
+}
+
+footer a:hover {
+    text-decoration: none;
+}
+
 .controls {
     display: flex;
     gap: 15px;
