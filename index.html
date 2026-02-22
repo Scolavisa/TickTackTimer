@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
-    <title>Klok Precisie Meter</title>
+    <title>Tick Tack Timer</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -14,8 +14,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Klok Precisie Meter</h1>
-            <p>Meet de timing precisie van klok tikken</p>
+            <h1>Tick Tack Timer</h1>
         </header>
 
         <main>
@@ -42,8 +41,10 @@
                         <div class="setting-group" id="customFreqGroup" style="display: none;">
                             <label>Aangepast Bereik:</label>
                             <div class="freq-inputs">
+                                <label for="minFreq">Min:</label>
                                 <input type="number" id="minFreq" placeholder="Min Hz" value="800">
                                 <span>-</span>
+                                <label for="maxFreq">Max:</label>
                                 <input type="number" id="maxFreq" placeholder="Max Hz" value="3000">
                                 <span>Hz</span>
                             </div>
@@ -143,6 +144,7 @@
         </main>
     </div>
 
+    <!-- Application logic -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
