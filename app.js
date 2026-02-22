@@ -7,6 +7,7 @@ class ClockPrecisionApp {
         this.isRecording = false;
         this.isCalibrating = false;
         this.currentMeasurementId = 0;
+        this.samplingDuration = 10;
         
         this.initializeElements();
         this.setupEventListeners();
@@ -25,6 +26,7 @@ class ClockPrecisionApp {
         
         // Settings
         this.settingsPanel = document.getElementById('settingsPanel');
+        this.samplingTimeSelect = document.getElementById('samplingTime');
         
         // Calibration elements
         this.calibrationPanel = document.getElementById('calibrationPanel');
@@ -54,9 +56,10 @@ class ClockPrecisionApp {
         
         // Result display
         this.currentResult = document.getElementById('currentResult');
-        this.totalDeviation = document.getElementById('totalDeviation');
-        this.avgTikDeviation = document.getElementById('avgTikDeviation');
-        this.avgTakDeviation = document.getElementById('avgTakDeviation');
+        this.t1Mean = document.getElementById('t1Mean');
+        this.t2Mean = document.getElementById('t2Mean');
+        this.balance = document.getElementById('balance');
+        this.nrSamples = document.getElementById('nrSamples');
         
         // History
         this.historyList = document.getElementById('measurementHistory');
@@ -114,6 +117,13 @@ class ClockPrecisionApp {
             this.factoryResetBtn.addEventListener('click', () => this.factoryReset());
         }
 
+        if (this.samplingTimeSelect) {
+            this.samplingTimeSelect.addEventListener('change', (e) => {
+                this.samplingDuration = parseInt(e.target.value);
+                localStorage.setItem('clockapp_samplingTime', e.target.value);
+            });
+        }
+
         this.thresholdSlider.addEventListener('input', (e) => {
             this.updateThreshold(parseInt(e.target.value));
         });
@@ -138,6 +148,7 @@ class ClockPrecisionApp {
     loadCalibrationSettings() {
         const preset = localStorage.getItem('clockapp_frequencyPreset');
         const threshold = localStorage.getItem('clockapp_threshold');
+        const samplingTime = localStorage.getItem('clockapp_samplingTime');
 
         if (preset && this.frequencyPreset) {
             this.frequencyPreset.value = preset;
@@ -152,6 +163,11 @@ class ClockPrecisionApp {
             this.thresholdSlider.value = value;
             this.updateThreshold(value);
         }
+
+        if (samplingTime !== null && this.samplingTimeSelect) {
+            this.samplingTimeSelect.value = samplingTime;
+            this.samplingDuration = parseInt(samplingTime);
+        }
     }
 
     saveCalibrationSettings() {
@@ -162,6 +178,7 @@ class ClockPrecisionApp {
     factoryReset() {
         localStorage.removeItem('clockapp_frequencyPreset');
         localStorage.removeItem('clockapp_threshold');
+        localStorage.removeItem('clockapp_samplingTime');
 
         if (this.frequencyPreset) {
             this.frequencyPreset.value = 'medium';
@@ -173,6 +190,11 @@ class ClockPrecisionApp {
 
         this.thresholdSlider.value = 30;
         this.updateThreshold(30);
+
+        if (this.samplingTimeSelect) {
+            this.samplingTimeSelect.value = '10';
+            this.samplingDuration = 10;
+        }
     }
 
     setupAudioCallbacks() {
@@ -198,10 +220,10 @@ class ClockPrecisionApp {
         };
 
         // Progress updates
-        this.audioProcessor.onProgress = (current, total) => {
-            const percentage = (current / total) * 100;
+        this.audioProcessor.onProgress = (clickCount, elapsed, remaining) => {
+            const percentage = Math.min((elapsed / this.samplingDuration) * 100, 100);
             this.progressFill.style.width = percentage + '%';
-            this.progressText.textContent = current + '/' + total + ' tik-tak paren gedetecteerd';
+            this.progressText.textContent = Math.ceil(remaining) + 's resterend (' + clickCount + ' tikken gedetecteerd)';
         };
 
         // Batch completion
@@ -354,7 +376,7 @@ class ClockPrecisionApp {
             }
             
             // Start listening
-            this.audioProcessor.startListening();
+            this.audioProcessor.startListening(this.samplingDuration);
             this.isRecording = true;
             
             // Update UI to show progress
@@ -440,12 +462,11 @@ class ClockPrecisionApp {
         // Add to measurements history
         const measurement = {
             id: this.currentMeasurementId,
-            batchSize: analysis.batchSize,
-            avgTikDeviation: analysis.avgTikDeviation,
-            avgTakDeviation: analysis.avgTakDeviation,
-            totalDeviation: analysis.totalDeviation,
-            avgInterval: analysis.avgInterval,
-            timestamp: Date.now()
+            t1Mean: analysis.t1Mean,
+            t2Mean: analysis.t2Mean,
+            balance: analysis.balance,
+            nrSamples: analysis.nrSamples,
+            timestamp: analysis.timestamp
         };
         
         this.measurements.push(measurement);
@@ -456,77 +477,49 @@ class ClockPrecisionApp {
         // Add to history display
         this.addToHistory(measurement);
         
-        console.log('Batch result processed:', analysis);
+        console.log('Measurement result processed:', analysis);
     }
 
     updateResultDisplay(analysis) {
-        const totalDeviation = analysis.totalDeviation;
-        const avgTikDeviation = analysis.avgTikDeviation;
-        const avgTakDeviation = analysis.avgTakDeviation;
-        
-        // Update total deviation
-        this.totalDeviation.textContent = totalDeviation.toFixed(1) + '%';
-        
-        // Color code based on deviation level
-        this.totalDeviation.classList.remove('good', 'moderate', 'poor');
-        if (totalDeviation < 2) {
-            this.totalDeviation.classList.add('good');
-        } else if (totalDeviation < 5) {
-            this.totalDeviation.classList.add('moderate');
-        } else {
-            this.totalDeviation.classList.add('poor');
-        }
-        
-        // Update individual deviations
-        this.updateDeviationDisplay(this.avgTikDeviation, avgTikDeviation);
-        this.updateDeviationDisplay(this.avgTakDeviation, avgTakDeviation);
-    }
+        this.t1Mean.textContent = analysis.t1Mean.toFixed(1) + ' ms';
+        this.t2Mean.textContent = analysis.t2Mean.toFixed(1) + ' ms';
 
-    updateDeviationDisplay(element, deviation) {
-        const sign = deviation > 0 ? '+' : '';
-        element.textContent = sign + deviation.toFixed(1) + '%';
-        
-        element.classList.remove('positive', 'negative');
-        if (deviation > 0) {
-            element.classList.add('positive');
-        } else if (deviation < 0) {
-            element.classList.add('negative');
+        this.balance.textContent = analysis.balance.toFixed(1) + '%';
+        this.balance.classList.remove('good', 'moderate', 'poor');
+        if (analysis.balance >= 95) {
+            this.balance.classList.add('good');
+        } else if (analysis.balance >= 85) {
+            this.balance.classList.add('moderate');
+        } else {
+            this.balance.classList.add('poor');
         }
+
+        this.nrSamples.textContent = analysis.nrSamples;
     }
 
     addToHistory(measurement) {
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item';
         
-        const id = measurement.id;
-        const totalDeviation = measurement.totalDeviation;
-        const avgTikDeviation = measurement.avgTikDeviation;
-        const avgTakDeviation = measurement.avgTakDeviation;
-        const timestamp = measurement.timestamp;
-        
-        // Format timestamp
-        const date = new Date(timestamp);
+        const date = new Date(measurement.timestamp);
         const timeString = date.toLocaleTimeString('nl-NL', { 
             hour: '2-digit', 
             minute: '2-digit',
             second: '2-digit'
         });
         
-        // Determine deviation class
-        let devClass = 'good';
-        if (totalDeviation >= 5) devClass = 'poor';
-        else if (totalDeviation >= 2) devClass = 'moderate';
-        
-        const tikSign = avgTikDeviation > 0 ? '+' : '';
-        const takSign = avgTakDeviation < 0 ? '' : '+';
+        let balClass = 'good';
+        if (measurement.balance < 85) balClass = 'poor';
+        else if (measurement.balance < 95) balClass = 'moderate';
         
         historyItem.innerHTML = 
-            '<div class="index">#' + id + '</div>' +
+            '<div class="index">#' + measurement.id + '</div>' +
             '<div class="timestamp">' + timeString + '</div>' +
-            '<div class="total-dev ' + devClass + '">' + totalDeviation.toFixed(1) + '%</div>' +
+            '<div class="total-dev ' + balClass + '">' + measurement.balance.toFixed(1) + '%</div>' +
             '<div class="breakdown">' +
-                'Lang: ' + tikSign + avgTikDeviation.toFixed(1) + '% | ' +
-                'Kort: ' + takSign + avgTakDeviation.toFixed(1) + '%' +
+                't1: ' + measurement.t1Mean.toFixed(1) + 'ms | ' +
+                't2: ' + measurement.t2Mean.toFixed(1) + 'ms | ' +
+                'n=' + measurement.nrSamples +
             '</div>';
         
         // Add to top of history
@@ -541,17 +534,13 @@ class ClockPrecisionApp {
     getOverallStatistics() {
         if (this.measurements.length === 0) return null;
         
-        const totalDeviations = this.measurements.map(m => m.totalDeviation);
-        const tikDeviations = this.measurements.map(m => m.avgTikDeviation);
-        const takDeviations = this.measurements.map(m => m.avgTakDeviation);
+        const balances = this.measurements.map(m => m.balance);
         
         return {
             count: this.measurements.length,
-            avgTotalDeviation: totalDeviations.reduce((a, b) => a + b, 0) / totalDeviations.length,
-            avgTikDeviation: tikDeviations.reduce((a, b) => a + b, 0) / tikDeviations.length,
-            avgTakDeviation: takDeviations.reduce((a, b) => a + b, 0) / takDeviations.length,
-            bestMeasurement: Math.min(...totalDeviations),
-            worstMeasurement: Math.max(...totalDeviations)
+            avgBalance: balances.reduce((a, b) => a + b, 0) / balances.length,
+            bestBalance: Math.max(...balances),
+            worstBalance: Math.min(...balances)
         };
     }
 }
