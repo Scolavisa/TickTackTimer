@@ -1,7 +1,10 @@
-import { AudioProcessor } from './audio-processor.js'
+import { AudioProcessor } from './audio-processor.js';
+import { initI18n, t, setLanguage, getLanguage } from './i18n.js';
 
 class ClockPrecisionApp {
     constructor() {
+        initI18n();    
+        
         this.audioProcessor = new AudioProcessor();
         this.measurements = [];
         this.isRecording = false;
@@ -10,9 +13,12 @@ class ClockPrecisionApp {
         this.samplingDuration = 10;
         
         this.initializeElements();
+        this.applyUIText();
         this.setupEventListeners();
         this.setupAudioCallbacks();
         this.loadCalibrationSettings();
+        this.setActiveNavButton(this.metenBtn);
+        window.addEventListener('languagechange', () => this.applyUIText());
     }
 
     initializeElements() {
@@ -72,7 +78,66 @@ class ClockPrecisionApp {
         // Calibration factory reset
         this.factoryResetBtn = document.getElementById('factoryResetBtn');
         
+        // Language
+        this.languageSelect = document.getElementById('languageSelect');
+
         console.log('Elements initialized. CalibrateBtn:', this.calibrateBtn);
+    }
+
+    applyUIText() {
+        const set = (id, key) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = t(key);
+        };
+        const setOption = (selectId, value, key) => {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const opt = sel.querySelector('option[value="' + value + '"]');
+            if (opt) opt.textContent = t(key);
+        };
+
+        set('appTitle', 'appTitle');
+        set('metenBtn', 'btnMeasure');
+        set('calibrateBtn', 'btnCalibrate');
+        set('settingsBtn', 'btnSettings');
+        set('calibrationPanelTitle', 'calibrationTitle');
+        set('clockTypeLabel', 'clockType');
+        setOption('frequencyPreset', 'small', 'clockSmall');
+        setOption('frequencyPreset', 'medium', 'clockMedium');
+        setOption('frequencyPreset', 'large', 'clockLarge');
+        setOption('frequencyPreset', 'custom', 'clockCustom');
+        set('customRangeLabel', 'customRange');
+        set('minFreqLabel', 'minFreq');
+        set('maxFreqLabel', 'maxFreq');
+        set('startCalibrationBtn', 'startTest');
+        set('factoryResetBtn', 'factoryReset');
+        set('detectedTicksLabel', 'detectedTicks');
+        set('timeRemainingLabel', 'timeRemaining');
+        set('calibrationAdvice', 'calibrationPlaceMic');
+        set('settingsPanelTitle', 'settingsTitle');
+        set('languageLabel', 'languageLabel');
+        set('settingsIntro', 'settingsIntro');
+        set('startBtn', 'startMeasurement');
+        set('stopBtn', 'stopMeasurement');
+        set('resetBtn', 'reset');
+        set('audioLevelLabel', 'audioLevel');
+        set('detectionThresholdLabel', 'detectionThreshold');
+        set('thresholdSensLeft', 'moreSensitive');
+        set('thresholdSensRight', 'lessSensitive');
+        set('currentMeasurementTitle', 'currentMeasurement');
+        set('progressText', 'readyToStart');
+        set('totalDeviationLabel', 'totalDeviation');
+        set('longerIntervalsLabel', 'longerIntervals');
+        set('shorterIntervalsLabel', 'shorterIntervals');
+        set('measurementHistoryTitle', 'measurementHistory');
+        set('createdByText', 'createdBy');
+
+        if (this.languageSelect) {
+            this.languageSelect.value = getLanguage();
+        }
+        if (this.startCalibrationBtn && !this.isCalibrating) {
+            this.startCalibrationBtn.textContent = t('startTest');
+        }
     }
 
     setupEventListeners() {
@@ -89,6 +154,12 @@ class ClockPrecisionApp {
         this.resetBtn.addEventListener('click', () => this.resetMeasurements());
         if (this.settingsBtn && this.settingsPanel) {
             this.settingsBtn.addEventListener('click', () => this.showSettingsView());
+        }
+
+        if (this.languageSelect) {
+            this.languageSelect.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
         }
         
         // Calibration controls
@@ -222,8 +293,8 @@ class ClockPrecisionApp {
         // Progress updates
         this.audioProcessor.onProgress = (clickCount, elapsed, remaining) => {
             const percentage = Math.min((elapsed / this.samplingDuration) * 100, 100);
-            this.progressFill.style.width = percentage + '%';
-            this.progressText.textContent = Math.ceil(remaining) + 's resterend (' + clickCount + ' tikken gedetecteerd)';
+            this.progressFill.style.width = percentage + '%';            
+            this.progressText.textContent = t('progressPairs', { current, total });
         };
 
         // Batch completion
@@ -249,11 +320,18 @@ class ClockPrecisionApp {
         };
     }
 
+    setActiveNavButton(activeBtn) {
+        [this.metenBtn, this.calibrateBtn, this.settingsBtn].forEach((btn) => {
+            if (btn) btn.classList.toggle('active', btn === activeBtn);
+        });
+    }
+
     /** Toon alleen de meten-sectie. */
     showMetenView() {
         if (this.calibrationPanel) this.calibrationPanel.style.display = 'none';
         if (this.settingsPanel) this.settingsPanel.style.display = 'none';
         if (this.metenSection) this.metenSection.style.display = '';
+        this.setActiveNavButton(this.metenBtn);
     }
 
     /** Toon alleen de kalibratie-sectie. */
@@ -261,6 +339,7 @@ class ClockPrecisionApp {
         if (this.calibrationPanel) this.calibrationPanel.style.display = 'block';
         if (this.settingsPanel) this.settingsPanel.style.display = 'none';
         if (this.metenSection) this.metenSection.style.display = 'none';
+        this.setActiveNavButton(this.calibrateBtn);
     }
 
     /** Toon alleen de instellingen-sectie. */
@@ -268,6 +347,7 @@ class ClockPrecisionApp {
         if (this.calibrationPanel) this.calibrationPanel.style.display = 'none';
         if (this.settingsPanel) this.settingsPanel.style.display = 'block';
         if (this.metenSection) this.metenSection.style.display = 'none';
+        this.setActiveNavButton(this.settingsBtn);
     }
 
     updateCustomFrequency() {
@@ -275,13 +355,13 @@ class ClockPrecisionApp {
         const maxHz = parseInt(this.maxFreq.value) || 3000;
         
         if (minHz >= maxHz) {
-            this.calibrationAdvice.textContent = 'Minimum frequentie moet lager zijn dan maximum';
+            this.calibrationAdvice.textContent = t('minFreqError');
             this.calibrationAdvice.className = 'calibration-advice error';
             return;
         }
         
         this.audioProcessor.setCustomFrequencyRange(minHz, maxHz);
-        this.calibrationAdvice.textContent = 'Aangepast bereik: ' + minHz + '-' + maxHz + ' Hz';
+        this.calibrationAdvice.textContent = t('customRangeSet', { min: minHz, max: maxHz });
         this.calibrationAdvice.className = 'calibration-advice';
     }
 
@@ -296,7 +376,7 @@ class ClockPrecisionApp {
     async startCalibrationTest() {
         try {
             this.isCalibrating = true;
-            this.startCalibrationBtn.textContent = 'Stop Test';
+            this.startCalibrationBtn.textContent = t('stopTest');
             this.startCalibrationBtn.classList.remove('primary');
             this.startCalibrationBtn.classList.add('secondary');
             
@@ -311,12 +391,12 @@ class ClockPrecisionApp {
             // Start calibration
             this.audioProcessor.startCalibration(10);
             
-            this.calibrationAdvice.textContent = 'Test gestart! Laat de klok tikken...';
+            this.calibrationAdvice.textContent = t('testStarted');
             this.calibrationAdvice.className = 'calibration-advice';
             
         } catch (error) {
             console.error('Failed to start calibration:', error);
-            alert('Kon geen toegang krijgen tot de microfoon. Fout: ' + error.message);
+            alert(t('micError') + error.message);
             this.resetCalibrationUI();
         }
     }
@@ -329,11 +409,11 @@ class ClockPrecisionApp {
 
     resetCalibrationUI() {
         this.isCalibrating = false;
-        this.startCalibrationBtn.textContent = 'Start Test (10s)';
+        this.startCalibrationBtn.textContent = t('startTest');
         this.startCalibrationBtn.classList.remove('secondary');
         this.startCalibrationBtn.classList.add('primary');
         this.tickCounter.textContent = '0';
-        this.timeRemaining.textContent = '10s';
+        this.timeRemaining.textContent = t('startTestTime');
     }
 
     processCalibrationResult(result) {
@@ -345,16 +425,16 @@ class ClockPrecisionApp {
         let adviceClass;
         
         if (tickCount === 0) {
-            advice = 'Geen tikken gedetecteerd. Verhoog het volume of verlaag de drempel.';
+            advice = t('noTicks');
             adviceClass = 'calibration-advice error';
         } else if (tickCount < 10) {
-            advice = tickCount + ' tikken gedetecteerd. Te weinig - verlaag de drempel of plaats microfoon dichter bij de klok.';
+            advice = t('tooFewTicks', { count: tickCount });
             adviceClass = 'calibration-advice warning';
         } else if (tickCount > 30) {
-            advice = tickCount + ' tikken gedetecteerd. Te veel - verhoog de drempel om ruis te verminderen.';
+            advice = t('tooManyTicks', { count: tickCount });
             adviceClass = 'calibration-advice warning';
         } else {
-            advice = tickCount + ' tikken gedetecteerd (' + ticksPerSecond.toFixed(1) + '/s). Goede instelling!';
+            advice = t('goodTicks', { count: tickCount, perSecond: ticksPerSecond.toFixed(1) });
             adviceClass = 'calibration-advice';
             this.saveCalibrationSettings();
         }
@@ -368,7 +448,7 @@ class ClockPrecisionApp {
     async startMeasurement() {
         try {
             this.startBtn.disabled = true;
-            this.startBtn.textContent = 'Initialiseren...';
+            this.startBtn.textContent = t('initializing');
             
             // Initialize audio processor if not already done
             if (!this.audioProcessor.audioContext) {
@@ -385,7 +465,7 @@ class ClockPrecisionApp {
             console.log('Batch measurement started');
         } catch (error) {
             console.error('Failed to start measurement:', error);
-            alert('Kon geen toegang krijgen tot de microfoon. Fout: ' + error.message);
+            alert(t('micError') + error.message);
             
             // Reset UI
             this.resetUIToStart();
@@ -410,7 +490,7 @@ class ClockPrecisionApp {
         
         // Reset displays
         this.hideResult();
-        this.progressText.textContent = 'Klaar om te starten';
+        this.progressText.textContent = t('readyToStart');
         this.progressFill.style.width = '0%';
         
         console.log('All measurements reset');
@@ -428,7 +508,7 @@ class ClockPrecisionApp {
         
         // Initialize progress
         this.progressFill.style.width = '0%';
-        this.progressText.textContent = 'Luisteren naar klok tikken...';
+        this.progressText.textContent = t('listening');
     }
 
     showResultMode(analysis) {
@@ -453,7 +533,7 @@ class ClockPrecisionApp {
         this.stopBtn.style.display = 'none';
         this.startBtn.style.display = 'inline-block';
         this.startBtn.disabled = false;
-        this.startBtn.textContent = 'Start Meting';
+        this.startBtn.textContent = t('startMeasurement');
     }
 
     processBatchResult(analysis) {
@@ -502,7 +582,8 @@ class ClockPrecisionApp {
         historyItem.className = 'history-item';
         
         const date = new Date(measurement.timestamp);
-        const timeString = date.toLocaleTimeString('nl-NL', { 
+        const locale = getLanguage() === 'nl' ? 'nl-NL' : 'en-GB';
+        const timeString = date.toLocaleTimeString(locale, { 
             hour: '2-digit', 
             minute: '2-digit',
             second: '2-digit'
