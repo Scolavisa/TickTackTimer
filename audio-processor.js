@@ -25,9 +25,10 @@ class AudioProcessor {
         
         // Tick detection state
         this.lastTickTime = null;
-        this.isWaitingForTak = false;
-        this.currentBatch = [];
-        this.targetBatchSize = 10; // 10 tik-tak pairs
+        this.clickTimes = [];
+        this.measurementStartTime = null;
+        this._measurementTimer = null;
+        this._lastProgressTime = null;
         
         // Peak level tracking for peak meter
         this.peakLevel = 0;
@@ -96,20 +97,25 @@ class AudioProcessor {
         }
     }
 
-    startListening() {
+    startListening(samplingDuration = 10) {
         if (!this.audioContext || !this.analyser) {
             throw new Error('Audio processor not initialized');
         }
 
         this.isListening = true;
+        this.clickTimes = [];
         this.lastTickTime = null;
-        this.isWaitingForTak = false;
-        this.currentBatch = [];
-        
+        this.samplingDuration = samplingDuration;
+        this.measurementStartTime = this.audioContext.currentTime;
+        this._lastProgressTime = null;
+
+        // Schedule automatic completion after sampling duration
+        this._measurementTimer = setTimeout(() => this.completeMeasurement(), samplingDuration * 1000);
+
         if (!this.isProcessing) {
             this.processAudio();
         }
-        console.log(`Started listening for ${this.targetBatchSize} tik-tak pairs`);
+        console.log(`Started listening for ${samplingDuration} seconds`);
     }
 
     startCalibration(duration = 10) {
@@ -161,6 +167,10 @@ class AudioProcessor {
 
     stopListening() {
         this.isListening = false;
+        if (this._measurementTimer) {
+            clearTimeout(this._measurementTimer);
+            this._measurementTimer = null;
+        }
         console.log('Stopped listening for ticks');
     }
 
@@ -220,6 +230,19 @@ class AudioProcessor {
             console.log(`Audio levels - Freq: ${(level * 100).toFixed(1)}%, Time: ${(timeDomainRms * 100).toFixed(1)}%, Final: ${(finalLevel * 100).toFixed(1)}%, Threshold: ${(this.threshold * 100).toFixed(1)}%`);
         }
 
+        // Update progress during measurement (throttled to ~10 updates/s)
+        if (!this.isCalibrating && this.measurementStartTime !== null) {
+            const nowAudio = this.audioContext.currentTime;
+            if (!this._lastProgressTime || (nowAudio - this._lastProgressTime) >= 0.1) {
+                this._lastProgressTime = nowAudio;
+                const elapsed = nowAudio - this.measurementStartTime;
+                const remaining = Math.max(0, this.samplingDuration - elapsed);
+                if (this.onProgress) {
+                    this.onProgress(this.clickTimes.length, elapsed, remaining);
+                }
+            }
+        }
+
         // Check for tick detection
         if (finalLevel > this.threshold) {
             console.log(`Tick detected! Level: ${(finalLevel * 100).toFixed(1)}%`);
@@ -265,141 +288,77 @@ class AudioProcessor {
             return;
         }
 
-        // Normal measurement mode
-        if (!this.isWaitingForTak) {
-            // This is a 'tik'
-            this.lastTickTime = currentTime;
-            this.isWaitingForTak = true;
-            
-            if (this.onTick) {
-                this.onTick('tik', currentTime);
-            }
-        } else {
-            // This is a 'tak'
-            const tikTime = this.lastTickTime;
-            const takTime = currentTime;
-            const interval = takTime - tikTime;
-            
-            // Add to current batch
-            this.addToBatch(tikTime, takTime, interval);
-            
-            // Reset for next pair
-            this.isWaitingForTak = false;
-            this.lastTickTime = null;
-            
-            if (this.onTick) {
-                this.onTick('tak', takTime, interval);
-            }
-            
-            // Update progress
-            if (this.onProgress) {
-                this.onProgress(this.currentBatch.length, this.targetBatchSize);
-            }
-            
-            // Check if batch is complete
-            if (this.currentBatch.length >= this.targetBatchSize) {
-                this.completeBatch();
-            }
+        // Normal measurement mode: record click timestamp
+        this.clickTimes.push(currentTime);
+        this.lastTickTime = currentTime;
+
+        if (this.onTick) {
+            this.onTick('click', currentTime);
         }
     }
 
-    addToBatch(tikTime, takTime, interval) {
-        const measurement = {
-            tikTime,
-            takTime,
-            interval,
-            timestamp: Date.now()
-        };
-        
-        this.currentBatch.push(measurement);
-    }
+    completeMeasurement() {
+        this.isListening = false;
+        if (this._measurementTimer) {
+            clearTimeout(this._measurementTimer);
+            this._measurementTimer = null;
+        }
 
-    completeBatch() {
-        // Calculate batch statistics
-        const batchAnalysis = this.analyzeBatch(this.currentBatch);
-        
-        // Trigger callback
+        const analysis = this.analyzeMeasurement(this.clickTimes);
+
         if (this.onBatchComplete) {
-            this.onBatchComplete(batchAnalysis);
+            this.onBatchComplete(analysis);
         }
-        
-        // Stop listening after batch completion
-        this.stopListening();
-        
-        console.log('Batch completed:', batchAnalysis);
+
+        console.log('Measurement completed:', analysis);
     }
 
-    analyzeBatch(batch) {
-        if (batch.length === 0) return null;
-        
-        // Extract all intervals (these are tik-to-tak intervals)
-        const intervals = batch.map(m => m.interval);
-        
-        // Calculate average interval - this becomes our "target" 
-        const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-        
-        // For a perfectly regular clock, all intervals should be identical
-        // The total deviation shows how much the timing varies
-        const variance = intervals.reduce((sum, interval) => {
-            const diff = interval - avgInterval;
-            return sum + (diff * diff);
-        }, 0) / intervals.length;
-        
-        const standardDeviation = Math.sqrt(variance);
-        const coefficientOfVariation = (standardDeviation / avgInterval) * 100;
-        
-        // Range-based deviation (max - min)
-        const minInterval = Math.min(...intervals);
-        const maxInterval = Math.max(...intervals);
-        const range = maxInterval - minInterval;
-        const rangeDeviation = (range / avgInterval) * 100;
-        
-        // Use the larger of coefficient of variation or range deviation
-        const totalDeviation = Math.max(coefficientOfVariation, rangeDeviation);
-        
-        // For tik/tak analysis, we need to think about this differently:
-        // We're measuring tik-to-tak intervals, not individual tik or tak durations
-        // 
-        // If we had a way to measure actual tik duration vs tak duration,
-        // we could calculate individual deviations. But with our current setup,
-        // we can only measure the interval between detections.
-        //
-        // For now, let's show interval consistency instead of fake tik/tak splits
-        
-        // Calculate how much each interval deviates from average
-        const individualDeviations = intervals.map(interval => 
-            ((interval - avgInterval) / avgInterval) * 100
-        );
-        
-        // Show the average positive and negative deviations separately
-        const positiveDeviations = individualDeviations.filter(d => d > 0);
-        const negativeDeviations = individualDeviations.filter(d => d < 0);
-        
-        const avgPositiveDeviation = positiveDeviations.length > 0 ? 
-            positiveDeviations.reduce((a, b) => a + b, 0) / positiveDeviations.length : 0;
-        const avgNegativeDeviation = negativeDeviations.length > 0 ? 
-            negativeDeviations.reduce((a, b) => a + b, 0) / negativeDeviations.length : 0;
-        
+    analyzeMeasurement(clickTimes) {
+        let times = [...clickTimes];
+
+        // Assignment 2: discard last click when even count so t1 and t2 have equal samples
+        if (times.length % 2 === 0) {
+            times = times.slice(0, -1);
+        }
+
+        // Need at least 3 clicks: one t1 sample (clicks 0→1) and one t2 sample (clicks 1→2)
+        if (times.length < 3) {
+            return { t1Mean: 0, t2Mean: 0, balance: 0, nrSamples: 0, timestamp: Date.now() };
+        }
+
+        const t1Samples = [];
+        const t2Samples = [];
+
+        for (let i = 0; i + 1 < times.length; i += 2) {
+            t1Samples.push(times[i + 1] - times[i]);
+            if (i + 2 < times.length) {
+                t2Samples.push(times[i + 2] - times[i + 1]);
+            }
+        }
+
+        const t1Mean = t1Samples.reduce((a, b) => a + b, 0) / t1Samples.length;
+        const t2Mean = t2Samples.reduce((a, b) => a + b, 0) / t2Samples.length;
+        const maxMean = Math.max(t1Mean, t2Mean);
+        const balance = maxMean > 0 ? (Math.min(t1Mean, t2Mean) / maxMean) * 100 : 0;
+
         return {
-            batchSize: batch.length,
-            avgTikDeviation: avgPositiveDeviation, // Intervals longer than average
-            avgTakDeviation: avgNegativeDeviation, // Intervals shorter than average
-            totalDeviation: totalDeviation,
-            avgInterval: avgInterval * 1000, // Convert to milliseconds
-            minInterval: minInterval * 1000,
-            maxInterval: maxInterval * 1000,
-            standardDeviation: standardDeviation * 1000,
-            coefficientOfVariation: coefficientOfVariation,
-            rangeDeviation: rangeDeviation,
-            measurements: batch,
+            t1Mean: t1Mean * 1000,  // convert to milliseconds
+            t2Mean: t2Mean * 1000,  // convert to milliseconds
+            balance: balance,
+            nrSamples: t1Samples.length,
             timestamp: Date.now()
         };
     }
 
     reset() {
-        this.currentBatch = [];
+        this.clickTimes = [];
         this.lastTickTime = null;
-        this.isWaitingForTak = false;
+        this.measurementStartTime = null;
+        this._lastProgressTime = null;
+        if (this._measurementTimer) {
+            clearTimeout(this._measurementTimer);
+            this._measurementTimer = null;
+        }
         this.peakLevel = 0;
         this.peakHoldStartTime = null;
     }
