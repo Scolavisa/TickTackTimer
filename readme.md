@@ -11,40 +11,29 @@ that the app uses to recognize the tick and distinguish it from the tack sound. 
 filter out noise. Once you are satisfied that the app can distinguish the tick and tack sounds, you can start the app
 for your actual measurements.
 
-## Measurements
-When you start a measurement session the app listens for a configurable sampling time (10, 20 or 30 seconds, set in
-Settings). All detected clicks are collected during that period. After the sampling time the app analyses the result
-and shows it.
-
 ## Settings
 The sampling time can be set to 10, 20 or 30 seconds via the Settings screen. The longer the sampling time, the more
 samples are collected, which increases the accuracy of the measurement. The setting is saved and remembered for the
 next session.
 
-## Meetmethode en algoritme
+## Method and algorithm
 
-During the sampling time the app records the timestamp of every detected click (tick or tack). These alternate between
-tick and tack:
+During the sampling time the app records the timestamp of every detected click (tick or tack). :
 
-```
-time:   0                       10  (seconds – the sampling time)
-tick:   |            |           |
-tack:           |           |
-sample: |..t1.../.t2.|..t1../.t2.|
-```
+![method.drawio.png](assets/docs/method.drawio.png)
 
 - **t1** is the interval from a tick to the following tack.
 - **t2** is the interval from a tack to the following tick.
 
-After collecting all clicks the app discards the last click when an even number was detected (an even count means the
+After collecting all clicks the app discards the last click when an **even** number was detected (an even count means the
 last click does not contribute a complete t1–t2 pair). It then computes:
 
-| Value | Description |
-|-------|-------------|
-| **t1 gemiddelde** | Mean of all t1 intervals (ms) |
-| **t2 gemiddelde** | Mean of all t2 intervals (ms) |
-| **Balans** | `smallest(t1mean, t2mean) / largest(t1mean, t2mean) × 100 %` |
-| **Aantal samples** | Number of complete t1–t2 pairs used |
+| Value                 | Description |
+|-----------------------|-------------|
+| **t1 mean**           | Mean of all t1 intervals (ms) |
+| **t2 mean**           | Mean of all t2 intervals (ms) |
+| **Balans**            | `smallest(t1mean, t2mean) / largest(t1mean, t2mean) × 100 %` |
+| **number of samples** | Number of complete t1–t2 pairs used |
 
 A **Balans** of 100 % means a perfectly balanced clock. The lower the value the more the pendulum needs adjusting.
 Because we use the smallest/largest ratio it does not matter whether we hear the tick or the tack first.
@@ -108,4 +97,4 @@ The app is designed to be straightforward and intuitive to use, with a focus on 
 look and feel. However, it is designed to be used on mobile devices. By using the internal microphone you should need no
 external hardware beyond your telephone.
 
-When you first start the app, it will most likely ask you if it is allowed to use the microphone.
+When you first start the app, you will likely need to allow it to use the microphone of your device.
