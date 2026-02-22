@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,36 +14,37 @@
 <body>
     <div class="container">
         <header>
-            <h1>Tick Tack Timer</h1>
+            <h1 id="appTitle">Tick Tack Timer</h1>
         </header>
 
         <main>
             <div class="controls">
-                <button id="metenBtn" class="btn">Meten</button>
+                <button id="metenBtn" class="btn measure">Meten</button>
                 <button id="calibrateBtn" class="btn calibrate">Kalibreren</button>
-                <button id="settingsBtn" class="btn">Instellingen</button>
+                <button id="settingsBtn" class="btn settings">Instellingen</button>
             </div>
 
             <div class="calibration-panel" id="calibrationPanel" style="display: none;">
-                <h3>Kalibratie Modus</h3>
+                <h3 id="calibrationTitle">Kalibratie Modus</h3>
                 <div class="calibration-content">
                     <div class="calibration-settings">
                         <div class="setting-group">
-                            <label for="frequencyPreset">Klok Type:</label>
                             <select id="frequencyPreset">
                                 <option value="small">Kleine Klok (1-4kHz)</option>
                                 <option value="medium" selected>Gemiddelde Klok (0.8-3kHz)</option>
                                 <option value="large">Grote Klok (0.5-2kHz)</option>
                                 <option value="custom">Aangepast</option>
                             </select>
+                            <button id="startCalibrationBtn" class="btn primary start space-t1">Start Test (10s)</button>
+                            <button id="factoryResetBtn" class="btn factory-reset">Fabrieksinstellingen</button>
                         </div>
                         <div class="setting-group" id="customFreqGroup" style="display: none;">
-                            <label>Aangepast Bereik:</label>
+                            <label id="customRangeLabel">Aangepast Bereik:</label>
                             <div class="freq-inputs">
-                                <label for="minFreq">Min:</label>
+                                <label for="minFreq" id="minFreqLabel">Min:</label>
                                 <input type="number" id="minFreq" placeholder="Min Hz" value="800">
                                 <span>-</span>
-                                <label for="maxFreq">Max:</label>
+                                <label for="maxFreq" id="maxFreqLabel">Max:</label>
                                 <input type="number" id="maxFreq" placeholder="Max Hz" value="3000">
                                 <span>Hz</span>
                             </div>
@@ -51,18 +52,13 @@
                     </div>
                     
                     <div class="calibration-test">
-                        <div class="test-controls">
-                            <button id="startCalibrationBtn" class="btn primary">Start Test (10s)</button>
-                            <button id="factoryResetBtn" class="btn factory-reset">Fabrieksinstellingen</button>
-                        </div>
-                        
                         <div class="calibration-results" id="calibrationResults">
                             <div class="tick-counter">
-                                <span class="label">Gedetecteerde Tikken:</span>
+                                <span class="label" id="detectedTicksLabel">Gedetecteerde Tikken:</span>
                                 <span id="tickCounter" class="count">0</span>
                             </div>
                             <div class="time-remaining">
-                                <span class="label">Resterende Tijd:</span>
+                                <span class="label" id="timeRemainingLabel">Resterende Tijd:</span>
                                 <span id="timeRemaining" class="time">10s</span>
                             </div>
                             <div class="calibration-advice" id="calibrationAdvice">
@@ -70,46 +66,27 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="settings-panel" id="settingsPanel" style="display: none;">
-                <h3>Instellingen</h3>
-                <div class="settings-content">
-                    <div class="setting-group">
-                        <label for="samplingTime">Meettijd:</label>
-                        <select id="samplingTime">
-                            <option value="10" selected>10 seconden</option>
-                            <option value="20">20 seconden</option>
-                            <option value="30">30 seconden</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="meten-section" id="metenSection">
-                <div class="meten-controls">
-                    <button id="startBtn" class="btn primary">Start Meting</button>
-                    <button id="stopBtn" class="btn secondary" disabled style="display: none;">Stop Meting</button>
-                    <button id="resetBtn" class="btn">Reset</button>
-                </div>
-                <div class="status" id="statusSection">
-                <div class="audio-level">
-                    <label>Audio Niveau:</label>
-                    <div class="level-bar">
-                        <div id="levelIndicator" class="level-fill"></div>
-                        <div id="peakIndicator" class="peak-indicator"></div>
-                    </div>
                 </div>
                 <div class="settings-row">
+                    <div class="status space-t2" id="statusSection">
+                        <div class="audio-level">
+                            <label id="audioLevelLabel">Audio Niveau:</label>
+                            <div class="level-bar">
+                                <div id="levelIndicator" class="level-fill"></div>
+                                <div id="peakIndicator" class="peak-indicator"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="threshold-control">
                         <div class="threshold-header">
-                            <label for="threshold">Detectie Drempel:</label>
+                            <label for="threshold" id="detectionThresholdLabel">Detectie Drempel:</label>
                             <span id="thresholdValue">30%</span>
                         </div>
                         <div class="threshold-sensitivity" id="thresholdSensitivity">
-                            <span>← Meer gevoelig</span>
-                            <span>Minder gevoelig →</span>
+                            <span id="thresholdSensLeft">← Meer gevoelig</span>
+                            <span id="thresholdSensRight">Minder gevoelig →</span>
                         </div>
                         <input type="range" id="threshold" min="0" max="100" value="30" aria-describedby="thresholdSensitivity">
                         <div class="threshold-steps">
@@ -119,12 +96,42 @@
                             <button class="btn threshold-btn" id="thresholdUp5">+5</button>
                         </div>
                     </div>
+                </div>                    
+
+            </div>
+
+            <div class="settings-panel" id="settingsPanel" style="display: none;">
+                <h3 id="settingsPanelTitle">Instellingen</h3>
+                <div class="settings-content">
+                    <div class="setting-group">
+                        <label for="samplingTime">Meettijd:</label>
+                        <select id="samplingTime">
+                            <option value="10" selected>10 seconden</option>
+                            <option value="20">20 seconden</option>
+                            <option value="30">30 seconden</option>
+                        </select>
+                    </div>
+                    <div class="setting-group space-t1">
+                        <label for="languageSelect" id="languageLabel">Taal</label>
+                        <select id="languageSelect" aria-describedby="languageLabel">
+                            <option value="en">English</option>
+                            <option value="nl">Nederlands</option>
+                        </select>
+                    </div>
+    
                 </div>
+            </div>
+
+            <div class="meten-section" id="metenSection">
+                <div class="meten-controls">
+                    <button id="startBtn" class="btn primary">Start Meting</button>
+                    <button id="stopBtn" class="btn secondary" disabled style="display: none;">Stop Meting</button>
+                    <button id="resetBtn" class="btn">Reset</button>
                 </div>
 
                 <div class="measurements" id="measurementsSection">
                 <div class="current-measurement">
-                    <h3>Huidige Meting</h3>
+                    <h3 id="currentMeasurementTitle">Huidige Meting</h3>
                     <div class="measurement-status">
                         <div id="measurementProgress" class="progress-display">
                             <div class="progress-bar">
@@ -158,7 +165,7 @@
                 </div>
 
                 <div class="history">
-                    <h3>Meetgeschiedenis</h3>
+                    <h3 id="measurementHistoryTitle">Meetgeschiedenis</h3>
                     <div id="measurementHistory" class="history-list">
                         <!-- Metingen worden hier toegevoegd -->
                     </div>
@@ -168,7 +175,7 @@
         </main>
 
         <footer>
-            Created by <a href="https://www.scolavisa.eu" target="_blank" rel="noopener noreferrer">Scolavisa</a>.
+            <span id="createdBy">Created by</span> <a href="https://www.scolavisa.eu" target="_blank" rel="noopener noreferrer">Scolavisa</a>.</span>
         </footer>
     </div>
 

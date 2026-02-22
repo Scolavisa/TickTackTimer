@@ -64,6 +64,12 @@ footer a:hover {
     margin-bottom: 30px;
 }
 
+.controls .btn.active {
+    outline: 3px solid #333;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
 .meten-section {
     margin-bottom: 20px;
 }
@@ -146,7 +152,7 @@ footer a:hover {
 
 .calibration-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 2fr;
     gap: 20px;
 }
 
@@ -248,14 +254,8 @@ footer a:hover {
 }
 
 .status {
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #f8f9fa;
+    padding: 20px 0;
     border-radius: 10px;
-}
-
-.audio-level {
-    margin-bottom: 15px;
 }
 
 .level-bar {
@@ -296,10 +296,6 @@ footer a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.threshold-header label {
-    font-weight: bold;
 }
 
 .threshold-header span {
@@ -605,4 +601,42 @@ footer a:hover {
     .threshold-btn {
         flex: 1;
     }
+}
+
+/* ICONS */
+.measure::before {
+    content: '\23F1';
+    margin-right: 0.35em;
+}
+.calibrate::before {
+    content: '\2714';
+    margin-right: 0.35em;
+}
+.settings::before {
+    content: '\2699';
+    margin-right: 0.35em;
+}
+.start::before {
+    content: '\25B6';
+    margin-right: 0.35em;
+}
+.stop::before {
+    content: '\25C0';
+    margin-right: 0.35em;
+}
+.reset::before {
+    content: '\27F2';
+    margin-right: 0.35em;
+}
+.factory-reset::before {
+    content: '\1F525';
+    margin-right: 0.35em;
+}
+
+/* SPACING */
+.space-t1 {
+    margin-top: 1rem;
+}
+.space-t2 {
+    margin-top: 1.5rem;
 }
